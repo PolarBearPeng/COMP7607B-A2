@@ -26,6 +26,8 @@ class RMSNorm(torch.nn.Module):
             torch.Tensor: Normalized tensor of the same shape as x
         """
         # Write your code here
+        norm_x = torch.rsqrt(torch.mean(x.pow(2), dim=-1, keepdim=True) + self.eps)
+        return self.weight * (x * norm_x)
 
 
 def precompute_pos_cis(dim: int, end: int = int(32 * 1024), theta: float = 1e6):
@@ -128,7 +130,13 @@ class Attention(nn.Module):
         )
 
         # Implement attention
-        # Write your code here
+        attn_weights = torch.matmul(xq, xk.transpose(2, 3)) / torch.sqrt(torch.tensor(self.head_dim, dtype=torch.float))
+        attn_weights = attn_weights + self.mask[:, :, :seq_len, :seq_len]
+        attn_weights = F.softmax(attn_weights, dim=-1)
+        attn_weights = self.attn_dropout(attn_weights)
+        output = torch.matmul(attn_weights, xv)
+        output = output.transpose(1, 2).contiguous().view(bsz, seq_len, -1)
+        output = self.resid_dropout(self.wo(output))
 
         return output, past_kv
 
