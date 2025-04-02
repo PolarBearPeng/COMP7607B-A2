@@ -176,7 +176,22 @@ class TrainerBase:
     def get_lr(self, current_step, total_steps):
         """Calculate learning rate with cosine decay schedule"""
         lr = self.args.learning_rate
-        return lr / 10 + 0.5 * lr * (1 + math.cos(math.pi * current_step / total_steps))
+        warmup_steps = self.args.warmup_iters
+
+        # 预热阶段：从lr/100线性增加到最大学习率
+        if current_step < warmup_steps:
+            # 计算预热比例
+            warmup_factor = current_step / warmup_steps
+            # 从lr/100逐渐增加到lr
+            return (lr / 100) * (1 - warmup_factor) + lr * warmup_factor
+        # 预热后的余弦衰减阶段
+        else:
+            # 计算余弦衰减，但调整步数范围，仅考虑非预热部分
+            adjusted_step = current_step - warmup_steps
+            adjusted_total = total_steps - warmup_steps
+        
+            # 使用您原来的衰减公式，但在预热后的调整步数上
+            return lr / 10 + 0.5 * lr * (1 + math.cos(math.pi * adjusted_step / adjusted_total))
 
     def train_epoch(self, epoch):
         """Train for one epoch"""
