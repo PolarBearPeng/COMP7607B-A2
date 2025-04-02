@@ -180,10 +180,9 @@ class TrainerBase:
 
         # 预热阶段：从lr/100线性增加到最大学习率
         if current_step < warmup_steps:
-            # 计算预热比例
-            warmup_factor = current_step / warmup_steps
-            # 从lr/100逐渐增加到lr
-            return (lr / 100) * (1 - warmup_factor) + lr * warmup_factor
+            # 简单线性插值：从lr/100到lr
+            return lr / 100 + (lr - lr / 100) * (current_step / warmup_steps)
+        
         # 预热后的余弦衰减阶段
         else:
             # 计算余弦衰减，但调整步数范围，仅考虑非预热部分
@@ -229,6 +228,11 @@ class TrainerBase:
             # Logging
             if step % self.args.log_interval == 0:
                 self.log_progress(epoch, step, loss, start_time)
+            
+            # Save checkpoint at specified interval
+            if self.args.save_interval > 0 and (step + 1) % self.args.save_interval == 0:
+                if not self.ddp or self.ddp_local_rank == 0:
+                    self.save_checkpoint(epoch=epoch)
 
         # Save checkpoint at epoch end
         if not self.ddp or self.ddp_local_rank == 0:
