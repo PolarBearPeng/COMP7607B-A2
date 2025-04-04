@@ -33,6 +33,7 @@ class PretrainDataset(Dataset):
 
         # Build input text
         text = f"{self.tokenizer.bos_token}{str(sample['text'])}{self.tokenizer.eos_token}"
+        # text = str(sample['text'])
         encoding = self.tokenizer(
             text,
             max_length=self.max_length,
