@@ -60,4 +60,4 @@ def check_dataset_token_length(jsonl_path, tokenizer, max_length=512):
     return token_lengths, over_length_count, total_count
 
 
-token_lengths, over_count, total = check_dataset_token_length("./data/processed_c4_en_1m.jsonl", tokenizer)
+token_lengths, over_count, total = check_dataset_token_length("./data/new_en_2m.jsonl", tokenizer)
