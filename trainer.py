@@ -18,7 +18,7 @@ from model.config import LMConfig
 from model.lora import apply_lora
 from model.model import MiniMindLM
 
-DEFAULT_VAL_SIZE = 1000
+DEFAULT_VAL_SIZE = 10000
 
 
 def logits_to_probs(logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
